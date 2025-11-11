@@ -39,3 +39,5 @@ class ConsumoDAO:
             cnx.close()
 
         return result
+l = ConsumoDAO()
+print(l.get_consumi(id_impianto=1),l.get_consumi(id_impianto=2))
