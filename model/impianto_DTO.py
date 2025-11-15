@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from database.consumo_DAO import ConsumoDAO
 
 '''
@@ -12,14 +12,17 @@ class Impianto:
     indirizzo: str
 
     # RELAZIONI
-    lista_consumi: list = None
+    lista_consumi: list = field(default_factory=list)
+
+
 
     def get_consumi(self):
         """ Aggiorna e Restituisce la lista di consumi (self.lista_consumi) associati all'impianto"""
 
+
         for consumi in ConsumoDAO().get_consumi(self.id):
             self.lista_consumi.append(consumi)
-            print(self.lista_consumi)
+
 
         return self.lista_consumi
 

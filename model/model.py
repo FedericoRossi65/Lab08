@@ -1,5 +1,5 @@
 from database.impianto_DAO import ImpiantoDAO
-from impianto_DTO import Impianto
+from model.impianto_DTO import Impianto
 from datetime import datetime
 
 '''
@@ -27,17 +27,23 @@ class Model:
         :param mese: Mese selezionato (un intero da 1 a 12)
         :return: lista di tuple --> (nome dell'impianto, media), es. (Impianto A, 123)
         """
-        # TODO
+
+        for impianto in self._impianti:
+            impianto.get_consumi() # chiamo il metodo per riempire la lista di valori
         lista_valori = []
         for impianto in self._impianti:
+
             count = 0
             somma = 0
-            for consumo in Impianto.lista_consumi:
-                data = datetime.strptime(consumo.data, '%d/%m/%Y')
+            for consumo in impianto.lista_consumi:
+                data = consumo.data
                 if data.month == mese:
-                    somma = somma + consumo.khw
+                    somma = somma + consumo.kwh
                     count += 1
-            media = somma / count
+            if count > 0: # condizione per evitare la divisione per zero
+                media = round(somma / count,2) # tronco il valore alla 2 cifra decimale
+            else:
+                media = 0
             lista_valori.append((impianto.nome, media))
         return lista_valori
 
@@ -74,6 +80,20 @@ class Model:
         """
         Restituisce i consumi dei primi 7 giorni del mese selezionato per ciascun impianto.
         :return: un dizionario: {id_impianto: [kwh_giorno1, ..., kwh_giorno7]}
+
         """
-        # TODO
+        consumi = {}
+
+
+        for imp in self._impianti:
+            consumi[imp.id] = [] # inizializzo lista vuota come valore del dizionario consumi
+            for consumo in imp.lista_consumi:
+                data = consumo.data
+                if data.month == mese and 1<= data.day <= 7: # verifico di prendere i primi 7 consumi
+                    consumi[imp.id].append(consumo.kwh)
+
+        return consumi
+
+
+
 

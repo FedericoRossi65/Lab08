@@ -39,5 +39,5 @@ class ConsumoDAO:
             cnx.close()
 
         return result
-l = ConsumoDAO()
-print(l.get_consumi(id_impianto=1),l.get_consumi(id_impianto=2))
+#l = ConsumoDAO()
+#print(l.get_consumi(id_impianto=1),l.get_consumi(id_impianto=2)) print per capire la struttura
