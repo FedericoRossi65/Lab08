@@ -74,7 +74,63 @@ class Model:
 
     def __ricorsione(self, sequenza_parziale, giorno, ultimo_impianto, costo_corrente, consumi_settimana):
         """ Implementa la ricorsione """
-        # TODO
+
+        COSTO_SPOSTAMENTO = 5
+        ids_impianti = list(consumi_settimana.keys()) # mi creo una lista cosi da avere in seguito i due id impianto
+
+
+
+        #caso base dove verifico se è il giorno 8, che è il segnale di stop
+        if giorno == 8: # completatto la sequeza di 7 giorni
+
+            #  confronto il suo costo totale (costo_corrente) con il miglior costo trovato fin ad adesso (self.__costo_ottimo).
+            if self.__costo_ottimo == -1 or costo_corrente < self.__costo_ottimo:
+                # Aggiorniamo i valori  della classe nel costruttore
+                self.__costo_ottimo = costo_corrente# salvo una copia della sequenza parziale
+
+                self.__sequenza_ottima = list(sequenza_parziale)
+                #termine delle operazioni su questo ramo
+
+
+            return
+
+
+
+        #parte ricorsiva devo iterare su tutte le scelte possibili dei due impianti.
+        for id_impianto_scelto in ids_impianti:
+
+            #calcolo il costo di questa scelta per oggi (giorno)
+
+            #dove costo = costoenergia+costospostamento
+            indice_giorno = giorno - 1 #per avere l'indice giusto
+            costo_energia = consumi_settimana[id_impianto_scelto][indice_giorno]
+
+
+            costo_spostamento = 0
+
+            if ultimo_impianto is not None and id_impianto_scelto != ultimo_impianto: #condizione per la quale ho un costo di spostamento(dal testo)[non è il primo giorno (ultimo impianto non è none)]
+                                                                                        # e l'impianto di oggi è diverso da quello di ieri)
+                costo_spostamento = COSTO_SPOSTAMENTO
+
+            costo_di_oggi = costo_energia + costo_spostamento
+
+            # lancio la chiamata ricorsiva per DOMANI (giorno + 1)
+            nuovo_costo_totale = costo_corrente + costo_di_oggi
+
+            # aggiungo la scelta corrente alla sequenza parziale
+            sequenza_parziale.append(id_impianto_scelto)
+
+            self.__ricorsione(
+                sequenza_parziale,  # passo la sequenza aggiornata
+                giorno + 1,  # er il giorno successivo
+                id_impianto_scelto,  # impianto di oggi è l'ultimo_impianto di domani
+                nuovo_costo_totale,  # costo accumulato aggiornato
+                consumi_settimana,
+
+            )
+
+            sequenza_parziale.pop()# backtrack, rimuoviamo la scelta appena fatta!!!!!!!!
+
 
     def __get_consumi_prima_settimana_mese(self, mese: int):
         """
@@ -84,13 +140,19 @@ class Model:
         """
         consumi = {}
 
-
         for imp in self._impianti:
-            consumi[imp.id] = [] # inizializzo lista vuota come valore del dizionario consumi
+            # crea una lista di 7 elementi, tutti 0 per evitare errori sugli indici
+            consumi[imp.id] = [0] * 7
+
+            #popola la lista nelle posizioni corrette
             for consumo in imp.lista_consumi:
                 data = consumo.data
-                if data.month == mese and 1<= data.day <= 7: # verifico di prendere i primi 7 consumi
-                    consumi[imp.id].append(consumo.kwh)
+                if data.month == mese and 1 <= data.day <= 7:
+                    indice = data.day - 1 # calcola l'indice giusto
+
+                    #sovrascrive gli 0 con i valori e se non ce il valore rimane 0
+                    consumi[imp.id][indice] = consumo.kwh
+
 
         return consumi
 
